@@ -35,6 +35,7 @@
 #include "G4UIExecutive.hh"
 #include "G4UImanager.hh"
 #include "G4VisExecutive.hh"
+#include "G4EmStandardPhysicsSS.hh"
 // #include "Randomize.hh"
 
 using namespace B1;
@@ -49,7 +50,15 @@ int main(int argc, char** argv)
   if (argc == 1) {
     ui = new G4UIExecutive(argc, argv);
   }
-
+  
+  G4String macro = "";
+  G4String physOpt = "MSC"; // Default to Multiple Scattering
+  
+  if (argc == 2) macro = argv[1];
+  if (argc == 3) { 
+      macro = argv[1]; 
+      physOpt = argv[2]; 
+  }
   // Optionally: choose a different Random engine...
   // G4Random::setTheEngine(new CLHEP::MTwistEngine);
 
@@ -67,8 +76,15 @@ int main(int argc, char** argv)
   runManager->SetUserInitialization(new DetectorConstruction());
 
   // Physics list
-  auto physicsList = new QGSP_BIC_HP;
-  physicsList->SetVerboseLevel(1);
+  G4VModularPhysicsList* physicsList = new QGSP_BIC_HP;
+  
+  if (physOpt == "SS") {
+      G4cout << "==== USING SINGLE SCATTERING ====" << G4endl;
+      physicsList->ReplacePhysics(new G4EmStandardPhysicsSS());
+  } else {
+      G4cout << "==== USING MULTIPLE SCATTERING ====" << G4endl;
+  }
+  
   runManager->SetUserInitialization(physicsList);
 
   // User action initialization

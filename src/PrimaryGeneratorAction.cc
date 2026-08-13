@@ -27,60 +27,24 @@
 /// \brief Implementation of the B1::PrimaryGeneratorAction class
 
 #include "PrimaryGeneratorAction.hh"
-
-#include "G4Box.hh"
-#include "G4LogicalVolume.hh"
-#include "G4LogicalVolumeStore.hh"
-#include "G4ParticleGun.hh"
-#include "G4ParticleTable.hh"
-#include "G4SystemOfUnits.hh"
-#include "Randomize.hh"
+#include "G4GeneralParticleSource.hh" // <-- Replaces ParticleGun
+#include "G4Event.hh"
 
 namespace B1
 {
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
 PrimaryGeneratorAction::PrimaryGeneratorAction()
 {
-  G4int n_particle = 1;
-  fParticleGun = new G4ParticleGun(n_particle);
-
-  // default particle kinematic
-  G4ParticleTable* particleTable = G4ParticleTable::GetParticleTable();
-  G4String particleName;
-  G4ParticleDefinition* particle = particleTable->FindParticle(particleName = "proton");
-  fParticleGun->SetParticleDefinition(particle);
-  fParticleGun->SetParticleMomentumDirection(G4ThreeVector(0., 0., 1.));
-  fParticleGun->SetParticleEnergy(185. * MeV);
+  // GPS requires no hardcoded setup here; it's all done in the .mac files!
+  fParticleGun = new G4GeneralParticleSource();
 }
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 PrimaryGeneratorAction::~PrimaryGeneratorAction()
 {
   delete fParticleGun;
 }
 
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
 void PrimaryGeneratorAction::GeneratePrimaries(G4Event* event)
 {
-  // 1. Define a 1 cm x 1 cm square beam to evenly irradiate your detector
-  G4double beamSize = 1.0 * cm;
-  
-  // Randomize X and Y between -0.5 cm and +0.5 cm
-  G4double x0 = beamSize * (G4UniformRand() - 0.5);
-  G4double y0 = beamSize * (G4UniformRand() - 0.5);
-  
-  // 2. Start the proton 4 cm in front of the detector (so it flies through vacuum first)
-  G4double z0 = -4.0 * cm;
-
-  // 3. Fire the gun
-  fParticleGun->SetParticlePosition(G4ThreeVector(x0, y0, z0));
   fParticleGun->GeneratePrimaryVertex(event);
 }
-
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-}  // namespace B1
+} // namespace B1

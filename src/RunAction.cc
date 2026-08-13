@@ -52,6 +52,7 @@ RunAction::RunAction()
   // --- OUR CUSTOM HISTOGRAM SETUP ---
   auto analysisManager = G4AnalysisManager::Instance();
   analysisManager->SetDefaultFileType("csv");
+  analysisManager->SetFileName("recoils");
   
   // Histogram 0: PKA Recoil Energy (For the Nuclear Lognormal Tail)
   analysisManager->CreateH1("PKA", "Recoil Energy (MeV)", 1000, 0.0, 185.0);
@@ -73,7 +74,8 @@ void RunAction::BeginOfRunAction(const G4Run*)
 
   // Open the CSV file at the start of the run
   auto analysisManager = G4AnalysisManager::Instance();
-  analysisManager->OpenFile("recoils");
+  // analysisManager->OpenFile("recoils");
+  analysisManager->OpenFile();
 }
 
 void RunAction::EndOfRunAction(const G4Run* run)

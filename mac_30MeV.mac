@@ -1,0 +1,10 @@
+/run/initialize
+/analysis/setFileName output_30MeV
+/gps/particle proton
+/gps/pos/type Plane
+/gps/pos/shape Square
+/gps/pos/halfx 0.5 cm
+/gps/pos/halfy 0.5 cm
+/gps/pos/centre 0 0 -4 cm
+/gps/direction 0 0 1
+/gps/energy 30 MeV
