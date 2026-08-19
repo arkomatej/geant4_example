@@ -44,7 +44,7 @@ namespace B1
 
 RunAction::RunAction()
 {
-  // Add edep and edep2 to the accumulable manager (Keeps default B1 logic happy)
+  // Add edep and edep2 to the accumulable manager
   G4AccumulableManager* accumulableManager = G4AccumulableManager::Instance();
   accumulableManager->Register(fEdep);
   accumulableManager->Register(fEdep2);
@@ -60,11 +60,32 @@ RunAction::RunAction()
   // Histogram 1: Coulomb NIEL (For the Gaussian Baseline)
   analysisManager->CreateH1("NIEL", "Lumped NIEL per Proton (MeV)", 1000, 0.0, 1.0);
   
-  // Create an Ntuple (basically a raw data table)
+  // ---------------------------------------------------------
+  // NTUPLE 0: Primary Knock-on Atoms (PKAs)
+  // ---------------------------------------------------------
   analysisManager->CreateNtuple("PKAs", "Raw Recoil Energies");
-  analysisManager->CreateNtupleDColumn("Energy_MeV"); // Create a column for Energy
-  analysisManager->CreateNtupleDColumn("AtomicNumber_Z");
+  analysisManager->CreateNtupleIColumn("EventID");           // Column 0 (Integer)
+  analysisManager->CreateNtupleDColumn("PrimaryEnergy_MeV"); // Column 1 (Double)
+  analysisManager->CreateNtupleDColumn("PKA_Energy_MeV");    // Column 2 (Double)
+  analysisManager->CreateNtupleDColumn("AtomicNumber_Z");    // Column 3 (Double)
+  analysisManager->CreateNtupleIColumn("MassNumber_A");      // Column 5 (Integer)
+  analysisManager->CreateNtupleIColumn("ParentID");
+  analysisManager->CreateNtupleSColumn("Particle");          // Column 6 (String)
+  analysisManager->CreateNtupleSColumn("Process");           // Column 7 (String)
+  analysisManager->CreateNtupleDColumn("PositionX_mm");      // Column 8 (Double)
+  analysisManager->CreateNtupleDColumn("PositionY_mm");      // Column 9 (Double)
+  analysisManager->CreateNtupleDColumn("PositionZ_mm");      // Column 10 (Double)
   analysisManager->FinishNtuple();
+
+  // ---------------------------------------------------------
+  // NTUPLE 1: Total NIEL Tracking per Event
+  // ---------------------------------------------------------
+  analysisManager->CreateNtuple("EventNIEL", "NIEL Tracking per Event");
+  analysisManager->CreateNtupleDColumn("CoulombNIEL");    // Column 0
+  analysisManager->CreateNtupleDColumn("NuclearNIEL");    // Column 1
+  analysisManager->CreateNtupleDColumn("TotalNIEL");      // Column 2
+  analysisManager->FinishNtuple();
+  
 }
 
 void RunAction::BeginOfRunAction(const G4Run*)
@@ -74,7 +95,6 @@ void RunAction::BeginOfRunAction(const G4Run*)
 
   // Open the CSV file at the start of the run
   auto analysisManager = G4AnalysisManager::Instance();
-  // analysisManager->OpenFile("recoils");
   analysisManager->OpenFile();
 }
 
@@ -93,12 +113,10 @@ void RunAction::EndOfRunAction(const G4Run* run)
   analysisManager->CloseFile();
 }
 
-// ---> ADD THESE LINES RIGHT HERE <---
 void RunAction::AddEdep(G4double edep)
 {
   fEdep  += edep;
   fEdep2 += edep*edep;
 }
-// ------------------------------------
 
 } // namespace B1

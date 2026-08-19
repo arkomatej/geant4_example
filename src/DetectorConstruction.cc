@@ -65,7 +65,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
   // Let's make it a 1cm x 1cm block, 1mm thick (you can adjust this to match your actual sensor chip)
   G4double det_sizeX = 1 * cm;
   G4double det_sizeY = 1 * cm;
-  G4double det_thickness = 1 * mm; 
+  G4double det_thickness = 0.1 * mm; 
 
   auto solidDetector = new G4Box("Detector", 0.5 * det_sizeX, 0.5 * det_sizeY, 0.5 * det_thickness);
   

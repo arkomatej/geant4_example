@@ -34,9 +34,11 @@
 #include "G4Event.hh"
 #include "G4RunManager.hh"
 #include "G4LogicalVolume.hh"
-#include "G4AnalysisManager.hh" // <-- CRITICAL
-#include "G4Track.hh"           // <-- CRITICAL
+#include "G4AnalysisManager.hh"
+#include "G4Track.hh"           
 #include "G4ParticleDefinition.hh"
+#include "G4VProcess.hh"
+#include "G4ThreeVector.hh"
 
 namespace B1
 {
@@ -64,27 +66,73 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
   G4ParticleDefinition* particleDef = track->GetDefinition();
   auto analysisManager = G4AnalysisManager::Instance();
 
-  // 1. Catch the Coulomb NIEL from the Primary Proton
-  if (track->GetParentID() == 0 && particleDef->GetParticleName() == "proton") {
-      G4double nielDeposit = step->GetNonIonizingEnergyDeposit();
-      if (nielDeposit > 0.0) {
-          analysisManager->FillH1(1, nielDeposit); // Fill Histogram 1
+  G4double nielDeposit = step->GetNonIonizingEnergyDeposit();
+
+  if (nielDeposit > 0.0) {
+      G4String processName = "Unknown";
+      const G4VProcess* process = step->GetPostStepPoint()->GetProcessDefinedStep();
+      if (process != nullptr) {
+          processName = process->GetProcessName();
+      }
+
+      // 1. Is this the Primary Proton that we shot from the particle gun?
+      if (track->GetTrackID() == 1 && particleDef->GetParticleName() == "proton") {
+          
+          // Did it crash into a nucleus?
+          if (processName == "hadElastic" || processName.find("Inelastic") != std::string::npos) {
+              fEventAction->AddNuclearNIEL(nielDeposit);
+          } 
+          // Otherwise, it is just flying through the lattice (Coulomb drag)
+          else {
+              fEventAction->AddCoulombNIEL(nielDeposit);
+          }
+      } 
+      // 2. Is this a Secondary Particle? (Alphas, Neutrons, Heavy Recoils, etc.)
+      else {
+          // All secondaries are born from nuclear events, so ALL their NIEL is Hadronic!
+          fEventAction->AddNuclearNIEL(nielDeposit);
       }
   }
 
   // 2. Catch the Nuclear Spallation Recoils (PKAs)
   // ParentID > 0 means it's a secondary. Step 1 means it was just born.
   if (track->GetParentID() > 0 && track->GetCurrentStepNumber() == 1) {
-      // Baryon number > 4 filters out electrons, gammas, protons, and alphas
       if (particleDef->GetBaryonNumber() > 4) {
           G4double kinEnergy = track->GetKineticEnergy();
           G4double atomicNumber = particleDef->GetAtomicNumber();
+          G4int parentID = track->GetParentID();
+          G4int massNumber = particleDef->GetBaryonNumber();
+          G4String particleName = particleDef->GetParticleName();
+
+          G4String creatorProcessName = "Unknown";
+          const G4VProcess* creatorProcess = track->GetCreatorProcess();
+          if (creatorProcess != nullptr) {
+              creatorProcessName = creatorProcess->GetProcessName();
+          }
+
+          G4ThreeVector position = track->GetPosition();
+
           if (kinEnergy > 0.0){
-            analysisManager->FillH1(0, kinEnergy); // Fill Histogram 0
-            // Fill the Ntuple instead of the histogram
-            analysisManager->FillNtupleDColumn(0, kinEnergy); // Fill column 0
-            analysisManager->FillNtupleDColumn(1, atomicNumber);
-            analysisManager->AddNtupleRow();                  // Write the row
+            
+            // Get the current Event ID and the Primary Proton Energy
+            G4int eventID = G4RunManager::GetRunManager()->GetCurrentEvent()->GetEventID();
+            G4double primaryEnergy = fEventAction->GetPrimaryEnergy();
+
+            // Fill Ntuple 0 (PKAs)
+            analysisManager->FillNtupleIColumn(0, 0, eventID);
+            analysisManager->FillNtupleDColumn(0, 1, primaryEnergy);
+            analysisManager->FillNtupleDColumn(0, 2, kinEnergy);
+            analysisManager->FillNtupleDColumn(0, 3, atomicNumber);
+            analysisManager->FillNtupleIColumn(0, 4, parentID);
+            analysisManager->FillNtupleIColumn(0, 5, massNumber);
+            analysisManager->FillNtupleSColumn(0, 6, particleName);
+            analysisManager->FillNtupleSColumn(0, 7, creatorProcessName);
+            
+            // ADD THESE FILL COMMANDS:
+            analysisManager->FillNtupleDColumn(0, 8, position.x());
+            analysisManager->FillNtupleDColumn(0, 9, position.y());
+            analysisManager->FillNtupleDColumn(0, 10, position.z());
+            analysisManager->AddNtupleRow();
           }
       }
   }

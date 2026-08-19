@@ -29,6 +29,8 @@
 #include "ActionInitialization.hh"
 #include "DetectorConstruction.hh"
 #include "QGSP_BIC_HP.hh"
+//#include "FTFP_BERT.hh"
+#include "G4IonElasticPhysics.hh"
 
 #include "G4RunManagerFactory.hh"
 #include "G4SteppingVerbose.hh"
@@ -77,6 +79,8 @@ int main(int argc, char** argv)
 
   // Physics list
   G4VModularPhysicsList* physicsList = new QGSP_BIC_HP;
+  //G4VModularPhysicsList* physicsList = new FTFP_BERT;
+  physicsList->RegisterPhysics(new G4IonElasticPhysics());
   
   if (physOpt == "SS") {
       G4cout << "==== USING SINGLE SCATTERING ====" << G4endl;

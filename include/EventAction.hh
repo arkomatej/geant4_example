@@ -49,12 +49,20 @@ class EventAction : public G4UserEventAction
 
     void BeginOfEventAction(const G4Event* event) override;
     void EndOfEventAction(const G4Event* event) override;
+    void AddCoulombNIEL(G4double niel) { fCoulombNIEL += niel; }
+    void AddNuclearNIEL(G4double niel) { fNuclearNIEL += niel; }
 
     void AddEdep(G4double edep) { fEdep += edep; }
+
+    void SetPrimaryEnergy(G4double e) { fPrimaryEnergy = e; }
+    G4double GetPrimaryEnergy() const { return fPrimaryEnergy; }
 
   private:
     RunAction* fRunAction = nullptr;
     G4double fEdep = 0.;
+    G4double fCoulombNIEL = 0.;
+    G4double fNuclearNIEL = 0.;
+    G4double fPrimaryEnergy = 0.;
 };
 
 }  // namespace B1

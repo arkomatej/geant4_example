@@ -27,8 +27,11 @@
 /// \brief Implementation of the B1::EventAction class
 
 #include "EventAction.hh"
-
+#include "G4AnalysisManager.hh"
 #include "RunAction.hh"
+#include "G4Event.hh"
+#include "G4PrimaryVertex.hh"
+#include "G4PrimaryParticle.hh"
 
 namespace B1
 {
@@ -39,9 +42,12 @@ EventAction::EventAction(RunAction* runAction) : fRunAction(runAction) {}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void EventAction::BeginOfEventAction(const G4Event*)
+void EventAction::BeginOfEventAction(const G4Event* event)
 {
   fEdep = 0.;
+  fCoulombNIEL = 0.;
+  fNuclearNIEL = 0.;
+  fPrimaryEnergy = event->GetPrimaryVertex()->GetPrimary()->GetKineticEnergy();
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -50,6 +56,14 @@ void EventAction::EndOfEventAction(const G4Event*)
 {
   // accumulate statistics in run action
   fRunAction->AddEdep(fEdep);
+  if (fCoulombNIEL > 0. || fNuclearNIEL > 0.) {
+        auto analysisManager = G4AnalysisManager::Instance();
+        // Assuming Ntuple 1 is for NIEL tracking:
+        analysisManager->FillNtupleDColumn(1, 0, fCoulombNIEL);
+        analysisManager->FillNtupleDColumn(1, 1, fNuclearNIEL);
+        analysisManager->FillNtupleDColumn(1, 2, fCoulombNIEL + fNuclearNIEL); // Total
+        analysisManager->AddNtupleRow(1);
+    }
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
