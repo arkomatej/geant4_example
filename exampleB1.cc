@@ -29,19 +29,16 @@
 #include "ActionInitialization.hh"
 #include "DetectorConstruction.hh"
 // Change from QGSP_BIC_HP to QGSP_BERT to use the Bertini inelastic model (0-9.9 GeV)
-#include "QGSP_BERT.hh" 
-#include "G4IonElasticPhysics.hh"
-#include "G4IonPhysics.hh" // Added for inelastic ion interactions
+#include "QGSP_BERT.hh"
 
 #include "G4RunManagerFactory.hh"
 #include "G4SteppingVerbose.hh"
 #include "G4UIExecutive.hh"
 #include "G4UImanager.hh"
 #include "G4VisExecutive.hh"
-#include "G4EmStandardPhysics.hh"
 
 // You will need to create this custom header (explained below)
-#include "CustomEMPhysics.hh" 
+#include "CustomEMPhysics.hh"
 
 using namespace B1;
 
@@ -68,18 +65,18 @@ int main(int argc, char** argv)
 
   runManager->SetUserInitialization(new DetectorConstruction());
 
-  // 1. Set base physics list to match the Bertini (0-9.9 GeV) inelastic model
+  // 1. Set base physics list to match the Bertini (0-9.9 GeV) inelastic model.
+  // QGSP_BERT already registers G4EmStandardPhysics, G4HadronElasticPhysics
+  // (covers ion elastic scattering) and G4IonPhysics internally, so those
+  // must NOT be registered again here -- doing so causes Geant4 to abort
+  // /run/initialize with a fatal "process already registered" exception,
+  // which in turn prevents PrimaryGeneratorAction (and thus /gps/...) from
+  // ever being built.
   G4VModularPhysicsList* physicsList = new QGSP_BERT;
-  
-  // 2. Register standard EM physics (provides multiple scattering, basic bremsstrahlung, etc.)
-  physicsList->RegisterPhysics(new G4EmStandardPhysics());
 
-  // 3. Register your custom additions to match the paper exactly
-  physicsList->RegisterPhysics(new CustomEMPhysics()); 
-  
-  // 4. Register Elastic and Inelastic Ion Physics
-  physicsList->RegisterPhysics(new G4IonElasticPhysics());
-  physicsList->RegisterPhysics(new G4IonPhysics()); 
+  // 2. Register only the genuinely new physics from the paper: the
+  // G4ScreenedNuclearRecoil nuclear-stopping process for protons.
+  physicsList->RegisterPhysics(new CustomEMPhysics());
 
   runManager->SetUserInitialization(physicsList);
 
