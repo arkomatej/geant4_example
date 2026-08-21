@@ -55,10 +55,10 @@ RunAction::RunAction()
   analysisManager->SetFileName("recoils");
   
   // Histogram 0: PKA Recoil Energy (For the Nuclear Lognormal Tail)
-  analysisManager->CreateH1("PKA", "Recoil Energy (MeV)", 1000, 0.0, 185.0);
+  //analysisManager->CreateH1("PKA", "Recoil Energy (MeV)", 1000, 0.0, 185.0);
   
   // Histogram 1: Coulomb NIEL (For the Gaussian Baseline)
-  analysisManager->CreateH1("NIEL", "Lumped NIEL per Proton (MeV)", 1000, 0.0, 1.0);
+  //analysisManager->CreateH1("NIEL", "Lumped NIEL per Proton (MeV)", 1000, 0.0, 1.0);
   
   // ---------------------------------------------------------
   // NTUPLE 0: Primary Knock-on Atoms (PKAs)
@@ -80,11 +80,11 @@ RunAction::RunAction()
   // ---------------------------------------------------------
   // NTUPLE 1: Total NIEL Tracking per Event
   // ---------------------------------------------------------
-  analysisManager->CreateNtuple("EventNIEL", "NIEL Tracking per Event");
-  analysisManager->CreateNtupleDColumn("CoulombNIEL");    // Column 0
-  analysisManager->CreateNtupleDColumn("NuclearNIEL");    // Column 1
-  analysisManager->CreateNtupleDColumn("TotalNIEL");      // Column 2
-  analysisManager->FinishNtuple();
+  //analysisManager->CreateNtuple("EventNIEL", "NIEL Tracking per Event");
+  //analysisManager->CreateNtupleDColumn("CoulombNIEL");    // Column 0
+  //analysisManager->CreateNtupleDColumn("NuclearNIEL");    // Column 1
+  //analysisManager->CreateNtupleDColumn("TotalNIEL");      // Column 2
+  //analysisManager->FinishNtuple();
   
 }
 

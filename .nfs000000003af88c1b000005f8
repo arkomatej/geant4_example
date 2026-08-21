@@ -1,7 +1,0 @@
-#class tools::wcsv::ntuple
-#title NIEL Tracking per Event
-#separator 44
-#vector_separator 59
-#column double CoulombNIEL
-#column double NuclearNIEL
-#column double TotalNIEL

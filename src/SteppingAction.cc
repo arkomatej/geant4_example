@@ -68,31 +68,31 @@ void SteppingAction::UserSteppingAction(const G4Step* step)
 
   G4double nielDeposit = step->GetNonIonizingEnergyDeposit();
 
-  if (nielDeposit > 0.0) {
-      G4String processName = "Unknown";
-      const G4VProcess* process = step->GetPostStepPoint()->GetProcessDefinedStep();
-      if (process != nullptr) {
-          processName = process->GetProcessName();
-      }
+  // if (nielDeposit > 0.0) {
+  //     G4String processName = "Unknown";
+  //     const G4VProcess* process = step->GetPostStepPoint()->GetProcessDefinedStep();
+  //     if (process != nullptr) {
+  //         processName = process->GetProcessName();
+  //     }
 
-      // 1. Is this the Primary Proton that we shot from the particle gun?
-      if (track->GetTrackID() == 1 && particleDef->GetParticleName() == "proton") {
+  //     // 1. Is this the Primary Proton that we shot from the particle gun?
+  //     if (track->GetTrackID() == 1 && particleDef->GetParticleName() == "proton") {
           
-          // Did it crash into a nucleus?
-          if (processName == "hadElastic" || processName.find("Inelastic") != std::string::npos) {
-              fEventAction->AddNuclearNIEL(nielDeposit);
-          } 
-          // Otherwise, it is just flying through the lattice (Coulomb drag)
-          else {
-              fEventAction->AddCoulombNIEL(nielDeposit);
-          }
-      } 
-      // 2. Is this a Secondary Particle? (Alphas, Neutrons, Heavy Recoils, etc.)
-      else {
-          // All secondaries are born from nuclear events, so ALL their NIEL is Hadronic!
-          fEventAction->AddNuclearNIEL(nielDeposit);
-      }
-  }
+  //         // Did it crash into a nucleus?
+  //         if (processName == "hadElastic" || processName.find("Inelastic") != std::string::npos) {
+  //             fEventAction->AddNuclearNIEL(nielDeposit);
+  //         } 
+  //         // Otherwise, it is just flying through the lattice (Coulomb drag)
+  //         else {
+  //             fEventAction->AddCoulombNIEL(nielDeposit);
+  //         }
+  //     } 
+  //     // 2. Is this a Secondary Particle? (Alphas, Neutrons, Heavy Recoils, etc.)
+  //     else {
+  //         // All secondaries are born from nuclear events, so ALL their NIEL is Hadronic!
+  //         fEventAction->AddNuclearNIEL(nielDeposit);
+  //     }
+  // }
 
   // 2. Catch the Nuclear Spallation Recoils (PKAs)
   // ParentID > 0 means it's a secondary. Step 1 means it was just born.

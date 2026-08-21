@@ -9,13 +9,6 @@
 /gps/direction 0 0 1
 /gps/ene/type Arb
 /gps/hist/type arb
-/gps/hist/point 0.010  0.167311
-/gps/hist/point 0.021  0.149527
-/gps/hist/point 0.043  0.124829
-/gps/hist/point 0.089  0.129988
-/gps/hist/point 0.183  0.152496
-/gps/hist/point 0.379  0.201454
-/gps/hist/point 0.785  0.289625
 /gps/hist/point 1.624  0.449830
 /gps/hist/point 3.360  0.733382
 /gps/hist/point 6.952  1.161661
@@ -25,8 +18,4 @@
 /gps/hist/point 127.427  0.133392
 /gps/hist/point 263.665  0.022484
 /gps/hist/point 545.559  0.000535
-/gps/hist/point 1128.838  0.000361
-/gps/hist/point 2335.721  0.000167
-/gps/hist/point 4832.930  0.000055
-/gps/hist/point 10000.000  0.000014
 /gps/hist/inter Log

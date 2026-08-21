@@ -56,14 +56,14 @@ void EventAction::EndOfEventAction(const G4Event*)
 {
   // accumulate statistics in run action
   fRunAction->AddEdep(fEdep);
-  if (fCoulombNIEL > 0. || fNuclearNIEL > 0.) {
-        auto analysisManager = G4AnalysisManager::Instance();
-        // Assuming Ntuple 1 is for NIEL tracking:
-        analysisManager->FillNtupleDColumn(1, 0, fCoulombNIEL);
-        analysisManager->FillNtupleDColumn(1, 1, fNuclearNIEL);
-        analysisManager->FillNtupleDColumn(1, 2, fCoulombNIEL + fNuclearNIEL); // Total
-        analysisManager->AddNtupleRow(1);
-    }
+  // if (fCoulombNIEL > 0. || fNuclearNIEL > 0.) {
+  //       auto analysisManager = G4AnalysisManager::Instance();
+  //       // Assuming Ntuple 1 is for NIEL tracking:
+  //       // analysisManager->FillNtupleDColumn(1, 0, fCoulombNIEL);
+  //       // analysisManager->FillNtupleDColumn(1, 1, fNuclearNIEL);
+  //       // analysisManager->FillNtupleDColumn(1, 2, fCoulombNIEL + fNuclearNIEL); // Total
+  //       // analysisManager->AddNtupleRow(1);
+  //   }
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
