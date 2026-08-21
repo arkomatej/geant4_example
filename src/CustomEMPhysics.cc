@@ -51,7 +51,17 @@ void CustomEMPhysics::ConstructProcess()
     G4ParticleDefinition* proton = G4Proton::Proton();
     G4ProcessManager* protonManager = proton->GetProcessManager();
     G4ScreenedNuclearRecoil* screenedRecoil = new G4ScreenedNuclearRecoil();
-    // Setting max energy to 100 MeV as specified in the paper
-    //screenedRecoil->SetMaxKinEnergy(100.0 * CLHEP::MeV);
+
+    // Do NOT add SetMaxEnergyForScattering(100*MeV) here to chase the paper's
+    // "energy less than 100 MeV" remark. That setter controls processMaxEnergy,
+    // above which GetMeanFreePath returns DBL_MAX and the process is switched
+    // off entirely -- so at 185 MeV it would disable screened nuclear recoil for
+    // the whole primary track (the proton barely slows in a 0.1 mm target).
+    //
+    // The 100 MeV figure already exists as the built-in highEnergyLimit: above
+    // it the mean free path is simply held constant rather than the process
+    // being disabled, which is the behaviour the paper is describing. The
+    // constructor defaults (processMaxEnergy = 50 GeV, highEnergyLimit =
+    // 100 MeV) are therefore what we want.
     protonManager->AddDiscreteProcess(screenedRecoil);
 }
