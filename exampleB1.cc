@@ -28,8 +28,12 @@
 
 #include "ActionInitialization.hh"
 #include "DetectorConstruction.hh"
-// Change from QGSP_BIC_HP to QGSP_BERT to use the Bertini inelastic model (0-9.9 GeV)
+// Selectable via the third command-line argument (HADRON below); paper's
+// stated choice is Bertini (0-9.9 GeV), so QGSP_BERT stays the default.
 #include "QGSP_BERT.hh"
+#include "QGSP_BERT_HP.hh"
+#include "QGSP_BIC.hh"
+#include "QGSP_BIC_HP.hh"
 
 #include "G4EmStandardPhysicsSS.hh"
 #include "G4IonElasticPhysics.hh"
@@ -52,12 +56,24 @@ int main(int argc, char** argv)
   }
   
   G4String macro = "";
-  G4String physOpt = "MSC"; 
-  
+  G4String physOpt = "MSC";
+  // Hadronic inelastic model. "BERT" (default) is what the paper specifies
+  // (Bertini, 0-9.9 GeV). "BIC" swaps in the Binary Cascade for a direct
+  // comparison against the earlier QGSP_BIC_HP runs. The "_HP" variants add
+  // high-precision (ENDF-based) neutron transport below 20 MeV on top of
+  // either cascade, without changing which model handles the primary
+  // proton-nucleus inelastic collision.
+  G4String hadronOpt = "BERT";
+
   if (argc == 2) macro = argv[1];
-  if (argc == 3) { 
-      macro = argv[1]; 
-      physOpt = argv[2]; 
+  if (argc == 3) {
+      macro = argv[1];
+      physOpt = argv[2];
+  }
+  if (argc == 4) {
+      macro = argv[1];
+      physOpt = argv[2];
+      hadronOpt = argv[3];
   }
 
   G4int precision = 4;
@@ -67,12 +83,32 @@ int main(int argc, char** argv)
 
   runManager->SetUserInitialization(new DetectorConstruction());
 
-  // 1. Set base physics list to match the Bertini (0-9.9 GeV) inelastic model.
-  // QGSP_BERT already bundles G4EmStandardPhysics, G4HadronElasticPhysics and
-  // G4IonPhysics, so re-registering those is redundant:
+  // 1. Set base physics list. QGSP_BERT (the paper's stated choice) and its
+  // siblings already bundle G4EmStandardPhysics, G4HadronElasticPhysics and
+  // G4IonPhysics, so re-registering those below is redundant:
   // G4VModularPhysicsList::RegisterPhysics rejects a constructor whose physics
   // type is already present.
-  G4VModularPhysicsList* physicsList = new QGSP_BERT;
+  G4VModularPhysicsList* physicsList = nullptr;
+  if (hadronOpt == "BERT") {
+    physicsList = new QGSP_BERT;
+  }
+  else if (hadronOpt == "BERT_HP") {
+    physicsList = new QGSP_BERT_HP;
+  }
+  else if (hadronOpt == "BIC") {
+    physicsList = new QGSP_BIC;
+  }
+  else if (hadronOpt == "BIC_HP") {
+    physicsList = new QGSP_BIC_HP;
+  }
+  else {
+    G4cerr << "Unknown hadronic option '" << hadronOpt
+           << "', expected BERT|BERT_HP|BIC|BIC_HP. Defaulting to BERT."
+           << G4endl;
+    hadronOpt = "BERT";
+    physicsList = new QGSP_BERT;
+  }
+  G4cout << "==== HADRONIC INELASTIC MODEL: " << hadronOpt << " ====" << G4endl;
 
   // G4HadronElasticPhysics covers protons, neutrons, mesons and the light ions,
   // but elastic scattering of the *generic* ion comes from G4IonElasticPhysics,

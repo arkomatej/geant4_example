@@ -2,12 +2,20 @@
 # Run it directly (NOT through run_master.sh, which appends its own
 # /run/beamOn):
 #
-#     build/exampleB1 mac_smoketest.mac MSC
+#     build/exampleB1 mac_smoketest.mac MSC        # default: BERT
+#     build/exampleB1 mac_smoketest.mac MSC BIC     # compare hadronic models
+#     build/exampleB1 mac_smoketest.mac MSC BERT_HP
+#
+# Watch stdout for "==== HADRONIC INELASTIC MODEL: ... ====" printing back
+# what you asked for -- if you passed an unrecognized value it falls back to
+# BERT and prints a warning to say so.
 #
 # Deliberately does not set an output file name, so it tests only the thing
 # that was broken: that /gps/... resolves and that the user actions are
 # registered and scoring. Output therefore lands in the RunAction default,
-# recoils_nt_PKAs.csv.
+# recoils_nt_PKAs.csv -- so runs with different hadronic models will
+# overwrite each other's file here; that's fine for a resolves-or-not check,
+# just don't compare PKA counts between two smoketest runs from this file.
 /run/initialize
 /run/printProgress 100
 /gps/particle proton
