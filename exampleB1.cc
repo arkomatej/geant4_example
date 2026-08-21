@@ -32,6 +32,7 @@
 #include "QGSP_BERT.hh"
 
 #include "G4EmStandardPhysicsSS.hh"
+#include "G4IonElasticPhysics.hh"
 #include "G4RunManagerFactory.hh"
 #include "G4SteppingVerbose.hh"
 #include "G4UIExecutive.hh"
@@ -67,11 +68,21 @@ int main(int argc, char** argv)
   runManager->SetUserInitialization(new DetectorConstruction());
 
   // 1. Set base physics list to match the Bertini (0-9.9 GeV) inelastic model.
-  // QGSP_BERT already bundles G4EmStandardPhysics, G4HadronElasticPhysics
-  // (which covers ion elastic scattering) and G4IonPhysics, so re-registering
-  // them here is redundant: G4VModularPhysicsList::RegisterPhysics rejects a
-  // constructor whose physics type is already present.
+  // QGSP_BERT already bundles G4EmStandardPhysics, G4HadronElasticPhysics and
+  // G4IonPhysics, so re-registering those is redundant:
+  // G4VModularPhysicsList::RegisterPhysics rejects a constructor whose physics
+  // type is already present.
   G4VModularPhysicsList* physicsList = new QGSP_BERT;
+
+  // G4HadronElasticPhysics covers protons, neutrons, mesons and the light ions,
+  // but elastic scattering of the *generic* ion comes from G4IonElasticPhysics,
+  // which QGSP_BERT does not appear to bundle. The earlier QGSP_BIC_HP build
+  // registered it explicitly, so keep it to avoid losing elastic scattering of
+  // the heavy recoils. If the base list does already provide it this is a
+  // harmless no-op (RegisterPhysics warns and skips). Confirm either way in the
+  // "Hadronic Processes for GenericIon" block of the run output: it should list
+  // a "Process: ionElastic".
+  physicsList->RegisterPhysics(new G4IonElasticPhysics());
 
   // 2. Honour the second command-line argument: "SS" swaps the default
   // multiple-scattering EM physics for single scattering. Without this the

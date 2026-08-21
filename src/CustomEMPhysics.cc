@@ -48,9 +48,13 @@ void CustomEMPhysics::ConstructProcess()
     // The only physics genuinely missing from the base list is the nuclear
     // stopping power of recoil atoms for protons below 100 MeV, so that is
     // the only process added here.
+    // One shared instance serves every projectile species: the process keys its
+    // crossSectionHandlers map on the projectile Z, which is exactly why it is
+    // designed to be attached to more than one particle.
+    G4ScreenedNuclearRecoil* screenedRecoil = new G4ScreenedNuclearRecoil();
+
     G4ParticleDefinition* proton = G4Proton::Proton();
     G4ProcessManager* protonManager = proton->GetProcessManager();
-    G4ScreenedNuclearRecoil* screenedRecoil = new G4ScreenedNuclearRecoil();
 
     // Do NOT add SetMaxEnergyForScattering(100*MeV) here to chase the paper's
     // "energy less than 100 MeV" remark. That setter controls processMaxEnergy,
@@ -64,4 +68,18 @@ void CustomEMPhysics::ConstructProcess()
     // constructor defaults (processMaxEnergy = 50 GeV, highEnergyLimit =
     // 100 MeV) are therefore what we want.
     protonManager->AddDiscreteProcess(screenedRecoil);
+
+    // Also attach it to the generic ion. The paper adds this process to model
+    // "the nuclear stopping power of the recoil atom", and IsApplicable()
+    // accepts anything of particle type "nucleus" while BuildPhysicsTable()
+    // explicitly names GenericIon -- so the recoils are the intended target,
+    // not just the primary proton.
+    //
+    // Without this the recoil atoms have only ionIonisation (electronic
+    // stopping) and ionInelastic, so a knocked-on Ga/As/In atom simply slows
+    // down and never displaces further lattice atoms: no secondary knock-on
+    // cascade, and the displacement damage is badly under-counted.
+    G4ParticleDefinition* genericIon = G4GenericIon::GenericIon();
+    G4ProcessManager* ionManager = genericIon->GetProcessManager();
+    ionManager->AddDiscreteProcess(screenedRecoil);
 }
