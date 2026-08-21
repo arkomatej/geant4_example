@@ -1,0 +1,15 @@
+# Fast sanity check: same setup as mac_185MeV.mac but only 1000 protons.
+# Use this to confirm the /gps/... commands resolve and the recoil ntuple is
+# written before launching a full-statistics run.
+/run/initialize
+/analysis/setFileName output_smoketest
+/run/printProgress 100
+/gps/particle proton
+/gps/pos/type Plane
+/gps/pos/shape Square
+/gps/pos/halfx 0.5 cm
+/gps/pos/halfy 0.5 cm
+/gps/pos/centre 0 0 -4 cm
+/gps/direction 0 0 1
+/gps/energy 185 MeV
+/run/beamOn 1000

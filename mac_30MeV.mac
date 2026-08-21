@@ -1,4 +1,5 @@
 /run/initialize
+/analysis/setFileName output_30MeV
 /run/printProgress 1000000
 /gps/particle proton
 /gps/pos/type Plane
@@ -8,3 +9,4 @@
 /gps/pos/centre 0 0 -4 cm
 /gps/direction 0 0 1
 /gps/energy 30 MeV
+/run/beamOn 100000000

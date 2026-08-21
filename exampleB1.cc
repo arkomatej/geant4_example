@@ -66,12 +66,10 @@ int main(int argc, char** argv)
   runManager->SetUserInitialization(new DetectorConstruction());
 
   // 1. Set base physics list to match the Bertini (0-9.9 GeV) inelastic model.
-  // QGSP_BERT already registers G4EmStandardPhysics, G4HadronElasticPhysics
-  // (covers ion elastic scattering) and G4IonPhysics internally, so those
-  // must NOT be registered again here -- doing so causes Geant4 to abort
-  // /run/initialize with a fatal "process already registered" exception,
-  // which in turn prevents PrimaryGeneratorAction (and thus /gps/...) from
-  // ever being built.
+  // QGSP_BERT already bundles G4EmStandardPhysics, G4HadronElasticPhysics
+  // (which covers ion elastic scattering) and G4IonPhysics, so re-registering
+  // them here is redundant: G4VModularPhysicsList::RegisterPhysics rejects a
+  // constructor whose physics type is already present.
   G4VModularPhysicsList* physicsList = new QGSP_BERT;
 
   // 2. Register only the genuinely new physics from the paper: the
@@ -79,6 +77,13 @@ int main(int argc, char** argv)
   physicsList->RegisterPhysics(new CustomEMPhysics());
 
   runManager->SetUserInitialization(physicsList);
+
+  // 3. Register the user actions. Without this the PrimaryGeneratorAction is
+  // never constructed, so G4GeneralParticleSource never exists and none of
+  // the /gps/... commands are defined -- which is why the macro used to fail
+  // with "COMMAND NOT FOUND </gps/particle proton>". This also supplies the
+  // RunAction/EventAction/SteppingAction that write the recoil ntuple.
+  runManager->SetUserInitialization(new ActionInitialization());
 
   auto visManager = new G4VisExecutive(argc, argv);
   visManager->Initialize();
