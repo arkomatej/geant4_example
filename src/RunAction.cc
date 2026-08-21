@@ -68,8 +68,13 @@ RunAction::RunAction()
   analysisManager->CreateNtupleDColumn("PrimaryEnergy_MeV"); // Column 1 (Double)
   analysisManager->CreateNtupleDColumn("PKA_Energy_MeV");    // Column 2 (Double)
   analysisManager->CreateNtupleDColumn("AtomicNumber_Z");    // Column 3 (Double)
-  analysisManager->CreateNtupleIColumn("MassNumber_A");      // Column 5 (Integer)
-  analysisManager->CreateNtupleIColumn("ParentID");
+  // NOTE: ParentID is declared before MassNumber_A because that is the order
+  // SteppingAction actually fills them (column 4 = parentID, column 5 =
+  // massNumber). The declaration used to be the other way round, so the CSV
+  // header labelled these two columns backwards while the data underneath was
+  // fine. The physical column order is unchanged -- only the header is fixed.
+  analysisManager->CreateNtupleIColumn("ParentID");           // Column 4 (Integer)
+  analysisManager->CreateNtupleIColumn("MassNumber_A");       // Column 5 (Integer)
   analysisManager->CreateNtupleSColumn("Particle");          // Column 6 (String)
   analysisManager->CreateNtupleSColumn("Process");           // Column 7 (String)
   analysisManager->CreateNtupleDColumn("PositionX_mm");      // Column 8 (Double)
