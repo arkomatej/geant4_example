@@ -1,8 +1,14 @@
-# Fast sanity check: same setup as mac_185MeV.mac but only 1000 protons.
-# Use this to confirm the /gps/... commands resolve and the recoil ntuple is
-# written before launching a full-statistics run.
+# Fast sanity check: same beam as mac_185MeV.mac but only 1000 protons.
+# Run it directly (NOT through run_master.sh, which appends its own
+# /run/beamOn):
+#
+#     build/exampleB1 mac_smoketest.mac MSC
+#
+# Deliberately does not set an output file name, so it tests only the thing
+# that was broken: that /gps/... resolves and that the user actions are
+# registered and scoring. Output therefore lands in the RunAction default,
+# recoils_nt_PKAs.csv.
 /run/initialize
-/analysis/setFileName output_smoketest
 /run/printProgress 100
 /gps/particle proton
 /gps/pos/type Plane

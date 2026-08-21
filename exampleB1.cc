@@ -31,6 +31,7 @@
 // Change from QGSP_BIC_HP to QGSP_BERT to use the Bertini inelastic model (0-9.9 GeV)
 #include "QGSP_BERT.hh"
 
+#include "G4EmStandardPhysicsSS.hh"
 #include "G4RunManagerFactory.hh"
 #include "G4SteppingVerbose.hh"
 #include "G4UIExecutive.hh"
@@ -72,13 +73,25 @@ int main(int argc, char** argv)
   // constructor whose physics type is already present.
   G4VModularPhysicsList* physicsList = new QGSP_BERT;
 
-  // 2. Register only the genuinely new physics from the paper: the
+  // 2. Honour the second command-line argument: "SS" swaps the default
+  // multiple-scattering EM physics for single scattering. Without this the
+  // "MSC" argument passed by run_master.sh is dead and the _MSC/_SS suffixes
+  // on the output files would be meaningless.
+  if (physOpt == "SS") {
+    G4cout << "==== USING SINGLE SCATTERING ====" << G4endl;
+    physicsList->ReplacePhysics(new G4EmStandardPhysicsSS());
+  }
+  else {
+    G4cout << "==== USING MULTIPLE SCATTERING ====" << G4endl;
+  }
+
+  // 3. Register only the genuinely new physics from the paper: the
   // G4ScreenedNuclearRecoil nuclear-stopping process for protons.
   physicsList->RegisterPhysics(new CustomEMPhysics());
 
   runManager->SetUserInitialization(physicsList);
 
-  // 3. Register the user actions. Without this the PrimaryGeneratorAction is
+  // 4. Register the user actions. Without this the PrimaryGeneratorAction is
   // never constructed, so G4GeneralParticleSource never exists and none of
   // the /gps/... commands are defined -- which is why the macro used to fail
   // with "COMMAND NOT FOUND </gps/particle proton>". This also supplies the
